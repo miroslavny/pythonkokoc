@@ -39,23 +39,6 @@ for url in uniq_urls:
     print(url)
     uniq_urls_short.append(url)
 
-cnt = 0
-for a in uniq_urls_short:
-    url = a.get('href')
-    if url:
-        url = url.split('#')[0]
-    if url:
-        if main_url in url:
-            url = url.replace(main_url, '')
-        if url.startswith('http://') or url.startswith('https://') or url.startswith('mailto:') or url.startswith(
-                'tel:'):
-            continue
-        uniq_urls.add(url)
-    cnt += 1
-
-    if cnt > 3:
-        break
-
 
 uniq_urls_full = [main_url + url for url in uniq_urls_short]
 print(*uniq_urls_full)
