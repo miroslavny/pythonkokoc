@@ -1,8 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+import sys
 
-main_url = 'https://ak-sound.ru'
+main_url = sys.argv[1]
 
 request = requests.get(main_url)
 
@@ -17,8 +18,8 @@ else:
     print('ничего не найдено')
 
 
-
 uniq_urls = set()
+uniq_urls_list = []
 soup = BeautifulSoup(request.text, "html.parser")
 for link in soup.findAll('a'):
     url = link.get('href')
@@ -27,12 +28,33 @@ for link in soup.findAll('a'):
     if url:
         if main_url in url:
             url = url.replace(main_url, '')
-        if url.startswith('http://') or url.startswith('https://') or url.startswith('mailto:') or url.startswith('tel:') or 'javascript' in url:
+        if url.startswith('http://') or url.startswith('https://') or url.startswith('mailto:') or url.startswith('tel:') or 'javascript' in url or 'upload' in url or 'pdf' in url or 'jpg' in url  or 'docx' in url:
             continue
         uniq_urls.add(url)
+        uniq_urls_list.append(main_url + url)
+
+cnt = 0
+page_depth = sys.argv[2]
+while cnt < page_depth :
+    for x in uniq_urls_list:
+        request = requests.get(x)
+        soup = BeautifulSoup(request.text, "html.parser")
+        for link in soup.findAll('a'):
+            url = link.get('href')
+            if url:
+                url = url.split('#')[0]
+            if url:
+                if main_url in url:
+                    url = url.replace(main_url, '')
+                if url.startswith('http://') or url.startswith('https://') or url.startswith('mailto:') or url.startswith('tel:') or 'javascript' in url or 'upload' in url or 'pdf' in url or 'jpg' in url  or 'docx' in url:
+                    continue
+                if url not in uniq_urls:
+                    uniq_urls_list.append(main_url + url)
+                uniq_urls.add(url)
+    cnt += 1
+print (uniq_urls)
 
 print(f'найдено {len(uniq_urls)} уникальных ссылок')
-
 
 uniq_urls_short = []
 for url in uniq_urls:
